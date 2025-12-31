@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 
 interface UserI extends Document {
   name?: string;
-  email?: string;
+  email: string;
   password?: string;
   image?: string;
 }
@@ -16,6 +16,7 @@ const userSchema = new Schema<UserI>(
     },
     email: {
       type: String,
+      required: true,
       trim: true,
       lowercase: true,
       unique: true,
@@ -40,5 +41,5 @@ userSchema.pre<UserI>("save", async function () {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-const Client = mongoose.models.User || mongoose.model("Client", userSchema);
+const Client = mongoose.models.Client || mongoose.model("Client", userSchema);
 export default Client;

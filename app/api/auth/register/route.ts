@@ -20,6 +20,11 @@ export async function POST(req: NextRequest) {
       throw new ApiError(400, "Password must be at least 8 characters");
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new ApiError(400, "Invalid email address");
+    }
+
     // 2. Check existence by Email only (Industry Standard)
     const existedUser = await Client.findOne({ email });
     if (existedUser) {
@@ -36,6 +41,7 @@ export async function POST(req: NextRequest) {
     // 4. Convert to object and REMOVE password before sending to frontend
     const createdUser = user.toObject();
     delete createdUser.password;
+    delete createdUser._id;
 
     return NextResponse.json(
       new ApiResponse(201, createdUser, "User registered successfully")

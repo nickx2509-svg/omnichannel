@@ -1,21 +1,31 @@
+import { NextResponse } from "next/server";
 import { ApiError } from "./ApiError";
 
-type AsyncHandlerFn<T = unknown> = (...args: unknown[]) => Promise<T>;
-
 export const asyncHandler =
-  (fn: AsyncHandlerFn) =>
-  async (...args: unknown[]) => {
+  (fn: Function) => async (req?: Request, context?: any) => {
     try {
-      return await fn(...args);
-    } catch (error: unknown) {
+      return await fn(req, context);
+    } catch (error: any) {
+      // Known API error
       if (error instanceof ApiError) {
-        throw error;
+        return NextResponse.json(
+          {
+            success: false,
+            statusCode: error.statusCode,
+            message: error.message,
+          },
+          { status: error.statusCode }
+        );
       }
 
-      if (error instanceof Error) {
-        throw new ApiError(500, error.message);
-      }
-
-      throw new ApiError(500, "Internal Server Error");
+      // Unknown error
+      return NextResponse.json(
+        {
+          success: false,
+          statusCode: 500,
+          message: "Internal Server Error",
+        },
+        { status: 500 }
+      );
     }
   };
