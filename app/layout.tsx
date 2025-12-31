@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Omnichannel AI",
-  description: "AI-powered omnichannel automation platform",
+  title: " AI Omnichannel",
+  description: "Enterprise AI powered automation platform",
 };
 
 export default function RootLayout({
@@ -25,18 +25,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`
-          ${geistSans.variable}
-          ${geistMono.variable}
-          font-sans
-          antialiased
-          bg-background
-          text-foreground
-        `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#030303] text-zinc-200 selection:bg-white/10`}
       >
-        {children}
+        {/* Raycast-style Corner Glow */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+          <div 
+            className="absolute -top-[10%] -left-[1%] w-[40%] h-[10%] rounded-full opacity-20 blur-[120px]"
+            style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 80%)' }}
+          />
+        </div>
+
+        <main className="relative min-h-screen">
+          {children}
+        </main>
       </body>
     </html>
   );
