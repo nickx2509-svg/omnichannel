@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { Mail, Lock, User, Github, Chrome, Apple, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import axios from 'axios'
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface RegisterFormProps {
   onInputFocus: () => void;
@@ -13,6 +16,36 @@ export default function RegisterForm({ onInputFocus }: RegisterFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const naviagate = useRouter()
+
+  const handleRequest = async (e:React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+  
+
+  try {
+    await axios.post("/api/auth/register",{
+      name,
+      email,
+      password
+    } )
+    const res = await signIn("credentials",{
+      email,
+      password,
+      redirect: false
+    })
+    if(res?.ok){
+      naviagate.push('/dashboard')
+    } else {
+      console.log("login failed",res?.error)
+    }
+  } catch (error) {
+    console.log("Register error:", error);
+  } finally{
+    setLoading(false)
+  }
+  }
 
   // Logic: Button is unclickable if fields are empty
   const isFormEmpty = !name || !email || !password;
@@ -48,7 +81,7 @@ export default function RegisterForm({ onInputFocus }: RegisterFormProps) {
         </div>
 
         {/* Input Form Section */}
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-4" onSubmit={handleRequest}>
           <div className="relative group">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-white transition-colors" />
             <input 
