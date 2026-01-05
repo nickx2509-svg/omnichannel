@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { Mail, Lock, User, Github, Chrome, Apple, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import axios from 'axios'
+import axios from 'axios';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface RegisterFormProps {
   onInputFocus: () => void;
@@ -16,43 +17,46 @@ export default function RegisterForm({ onInputFocus }: RegisterFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error,setError] = useState("")
 
-  const naviagate = useRouter()
+  const navigate = useRouter();
 
-  const handleRequest = async (e:React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-  
+  const handleRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("")
 
-  try {
-    await axios.post("/api/auth/register",{
-      name,
-      email,
-      password
-    } )
-    const res = await signIn("credentials",{
-      email,
-      password,
-      redirect: false
-    })
-    if(res?.ok){
-      naviagate.push('/dashboard')
-    } else {
-      console.log("login failed",res?.error)
+    try {
+      await axios.post("/api/auth/register", {
+        name,
+        email,
+        password,
+        redirect:false
+      });
+      
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false
+      });
+
+      if (res?.ok) {
+        setError("Invalid email or password"); // Explain why they can't login
+        navigate.push('/');
+      } else {
+        console.log("login failed", res?.error);
+      }
+    } catch (error) {
+      console.log("Register error:", error);
+      setError("Something went wrong. Try again.");
+
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.log("Register error:", error);
-  } finally{
-    setLoading(false)
-  }
-  }
-
-  // Logic: Button is unclickable if fields are empty
-  const isFormEmpty = !name || !email || !password;
+  };
 
   return (
-    /* Increased max-width to 'lg' and added ml-12 to shift it right */
-    <div className="w-full max-w-lg p-8 relative mt-10 ml-6 md:ml-12">
+    <div className="w-full max-w-lg p-8 relative mt-10 ml-6 md:ml-12 ">
       {/* Subtle Inner Glow */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-black blur-3xl rounded-full" />
       
@@ -77,11 +81,13 @@ export default function RegisterForm({ onInputFocus }: RegisterFormProps) {
 
         <div className="relative flex items-center justify-center">
           <div className="w-full border-t border-white/10"></div>
-          <span className="absolute bg-[#030303] px-4 text-xs text-zinc-600 uppercase tracking-widest">or</span>
+          <span className="absolute bg-black px-4 text-xs text-zinc-600 uppercase tracking-widest">or</span>
         </div>
 
         {/* Input Form Section */}
-        <form className="space-y-4" onSubmit={handleRequest}>
+        <form className="space-y-4" onSubmit={handleRequest} >
+                    {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+
           <div className="relative group">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-white transition-colors" />
             <input 
@@ -90,7 +96,6 @@ export default function RegisterForm({ onInputFocus }: RegisterFormProps) {
               placeholder="Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              /* Changed py-4 to py-3 for a shorter look, w-full ensures it stays wide */
               className="w-full pl-12 pr-4 py-3 bg-white/[0.02] border border-white/5 rounded-2xl outline-none focus:border-white/20 focus:bg-white/[0.04] text-white transition-all"
             />
           </div>
@@ -126,24 +131,27 @@ export default function RegisterForm({ onInputFocus }: RegisterFormProps) {
             </button>
           </div>
 
-          {/* Action Button */}
+          {/* Action Button - Always clickable unless loading */}
           <button 
             type="submit"
-            disabled={isFormEmpty || loading}
+            disabled={loading}
             className="w-full py-4 bg-white text-black font-semibold rounded-2xl transition-all 
-                       active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed hover:bg-zinc-200"
+                       active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-200"
           >
             {loading ? "Creating..." : "Create an account"}
           </button>
         </form>
 
-        {/* Bottom Link */}
-        <button 
-          type="button"
-          className="w-full flex items-center justify-center gap-2 py-4 bg-black border border-zinc-900 text-zinc-500 hover:text-white transition-all rounded-2xl group"
+        {/* Bottom Link - Properly structured Link as a Button */}
+        <Link 
+          href="/login"
+          className="w-full flex items-center justify-center gap-2 py-4 bg-black border border-zinc-900 text-zinc-500 hover:text-white transition-all rounded-2xl group text-sm"
         >
-           Already have an account? <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </button>
+          Already have an account? 
+          <span className="flex items-center gap-1 font-medium text-zinc-300 group-hover:text-white">
+            Log in <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </span>
+        </Link>
       </div>
     </div>
   );

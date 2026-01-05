@@ -33,7 +33,7 @@ export default function RootLayout({
         <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
           <div 
             className="absolute -top-[10%] -left-[1%] w-[40%] h-[10%] rounded-full opacity-20 blur-[120px]"
-            style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 80%)' }}
+            style={{ background: 'radial-gradient(circle, #1F1C1C 0%, transparent 80%)' }}
           />
         </div>
 
